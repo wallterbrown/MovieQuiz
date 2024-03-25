@@ -7,53 +7,43 @@ final class MovieQuizViewController: UIViewController {
     @IBOutlet private var textLabel: UILabel!
     @IBOutlet private var counterLabel: UILabel!
     
-    // переменная с индексом текущего вопроса, начальное значение 0
-    // (по этому индексу будем искать вопрос в массиве, где индекс первого элемента 0, а не 1)
     private var currentQuestionIndex = 0
-    
-    // переменная со счётчиком правильных ответов, начальное значение закономерно 0
     private var correctAnswers = 0
-    
     private var bestScore = 0
-    
     private var totalQuizePlayed = 0
-    
     private var bestScoreDate: Date?
-    
     private var averageAccuracy: Double = 0.0
-    
     private var currentScore = 0
-    
     private var totalCorrectAnswers = 0
     
-    // структура вопроса
+    /// структура вопроса
     struct QuizQuestion {
-        // строка с названием фильма,
-        // совпадает с названием картинки афиши фильма в Assets
+        /// строка с названием фильма,
+        /// совпадает с названием картинки афиши фильма в Assets
         let image: String
         // строка с вопросом о рейтинге фильма
         let text: String
-        // булевое значение (true, false), правильный ответ на вопрос
+        /// булевое значение (true, false), правильный ответ на вопрос
         let correctAnswer: Bool
     }
     
-    // для состояния "Вопрос показан"
+    /// для состояния "Вопрос показан"
     struct QuizStepViewModel {
-        // картинка с афишей фильма с типом UIImage
+        /// картинка с афишей фильма с типом UIImage
         let image: UIImage
-        // вопрос о рейтинге квиза
+        /// вопрос о рейтинге квиза
         let question: String
-        // строка с порядковым номером этого вопроса (ex. "1/10")
+        /// строка с порядковым номером этого вопроса (ex. "1/10")
         let questionNumber: String
     }
     
-    // для состояния "Результат квиза"
+    /// для состояния "Результат квиза"
     struct QuizResultsViewModel {
         let title: String
         let text: String
         let buttonText: String
     }
-    // массив вопросов
+    /// массив вопросов
     private let questions: [QuizQuestion] = [
         QuizQuestion(
             image: "The Godfather",
@@ -97,7 +87,26 @@ final class MovieQuizViewController: UIViewController {
             correctAnswer: false)
     ]
     
-    // приватный метод конвертации, который принимает моковый вопрос и возвращает вью модель для главного экрана
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        /// Проверяем, что изображение было загружено успешно
+        guard let image = UIImage(named: "The Godfather") else {
+            /// Если изображение не было загружено, можно выполнить какое-то действие или вывести сообщение об ошибке
+            print("Не удалось загрузить изображение")
+            return
+        }
+        
+        // Создание объекта QuizStepViewModel с развернутым изображением
+        let quizStep = QuizStepViewModel(image: image, question: "Рейтинг этого фильма больше, чем 6?", questionNumber: "1/10")
+        /// Вызов функции show(quiz:) с созданным объектом в качестве аргумента
+        show(quiz: quizStep)
+    }
+    
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
+    }
+    
+    /// приватный метод конвертации, который принимает моковый вопрос и возвращает вью модель для главного экрана
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
         let questionStep = QuizStepViewModel( // 1
             image: UIImage(named: model.image) ?? UIImage(), // 2
@@ -106,15 +115,15 @@ final class MovieQuizViewController: UIViewController {
         return questionStep
     }
     
-    // приватный метод вывода на экран вопроса, который принимает на вход вью модель вопроса и ничего не возвращает
+    /// приватный метод вывода на экран вопроса, который принимает на вход вью модель вопроса и ничего не возвращает
     private func show(quiz step: QuizStepViewModel) {
         imageView.image = step.image
         textLabel.text = step.question
         counterLabel.text = step.questionNumber
     }
     
-    // приватный метод, который меняет цвет рамки
-    // принимает на вход булевое значение и ничего не возвращает
+    /// приватный метод, который меняет цвет рамки
+    /// принимает на вход булевое значение и ничего не возвращает
     private func showAnswerResult(isCorrect: Bool) {
         if isCorrect { // 1
             correctAnswers += 1 // 2
@@ -123,17 +132,16 @@ final class MovieQuizViewController: UIViewController {
         imageView.layer.borderWidth = 8 // 2
         imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor // 3
         
-        // запускаем задачу через 1 секунду c помощью диспетчера задач
+        /// запускаем задачу через 1 секунду c помощью диспетчера задач
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            // код, который мы хотим вызвать через 1 секунду
+            self.imageView.layer.borderWidth = 0
             self.showNextQuestionOrResults()
         }
         
     }
     
-    
-    // приватный метод для показа результатов раунда квиза
-    // принимает вью модель QuizResultsViewModel и ничего не возвращает
+    /// приватный метод для показа результатов раунда квиза
+    /// принимает вью модель QuizResultsViewModel и ничего не возвращает
     private func show(quiz result: QuizResultsViewModel) {
         let alert = UIAlertController(
             title: result.title,
@@ -160,9 +168,7 @@ final class MovieQuizViewController: UIViewController {
         let dateFormatter = DateFormatter()
         dateFormatter.dateStyle = .short
         dateFormatter.timeStyle = .short
-        
-        let currentDate = Date() // Используем текущую дату
-        
+        let currentDate = Date() /// Используем текущую дату
         let alert = UIAlertController(title: "Результаты",
                                       message: "Правильных ответов: \(correctAnswers)/\(questions.count)\nКоличество сыгранных квизов: \(totalQuizePlayed)\nЛучший результат: \(bestScore)/10\nДата лучшего результата: \(bestScoreDate != nil ? dateFormatter.string(from: bestScoreDate!) : dateFormatter.string(from: currentDate))\nСредняя точность: \(String(format: "%.2f", averageAccuracy))%",
                                       preferredStyle: .alert)
@@ -209,36 +215,16 @@ final class MovieQuizViewController: UIViewController {
         }
     }
     
-    
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Проверяем, что изображение было загружено успешно
-        guard let image = UIImage(named: "The Godfather") else {
-            // Если изображение не было загружено, можно выполнить какое-то действие или вывести сообщение об ошибке
-            print("Не удалось загрузить изображение")
-            return
-        }
-        
-        // Создание объекта QuizStepViewModel с развернутым изображением
-        let quizStep = QuizStepViewModel(image: image, question: "Рейтинг этого фильма больше, чем 6?", questionNumber: "1/10")
-        // Вызов функции show(quiz:) с созданным объектом в качестве аргумента
-        show(quiz: quizStep)
-    }
-    
-    override var preferredStatusBarStyle: UIStatusBarStyle {
-        return .lightContent
-    }
     @IBAction private func noButtonClicked(_ sender: UIButton) {
-        let currentQuestion = questions[currentQuestionIndex] // 1
-        let givenAnswer = false // 2
-        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer) // 3
+        let currentQuestion = questions[currentQuestionIndex]
+        let givenAnswer = false
+        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
     
     @IBAction func yesButtonClicked(_ sender: UIButton) {
-        let currentQuestion = questions[currentQuestionIndex] // 1
+        let currentQuestion = questions[currentQuestionIndex]
         let givenAnswer = true // 2
-        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer) // 3
+        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
     
 }
