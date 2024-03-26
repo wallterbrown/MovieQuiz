@@ -89,16 +89,28 @@ final class MovieQuizViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+<<<<<<< HEAD
         /// Проверяем, что изображение было загружено успешно
         guard let image = UIImage(named: "The Godfather") else {
             /// Если изображение не было загружено, можно выполнить какое-то действие или вывести сообщение об ошибке
+=======
+        ///Проверяем, что изображение было загружено успешно
+        guard let image = UIImage(named: "The Godfather") else {
+            // Если изображение не было загружено, можно выполнить какое-то действие или вывести сообщение об ошибке
+>>>>>>> sprint_04
             print("Не удалось загрузить изображение")
             return
         }
         
+<<<<<<< HEAD
         // Создание объекта QuizStepViewModel с развернутым изображением
         let quizStep = QuizStepViewModel(image: image, question: "Рейтинг этого фильма больше, чем 6?", questionNumber: "1/10")
         /// Вызов функции show(quiz:) с созданным объектом в качестве аргумента
+=======
+        /// Создание объекта QuizStepViewModel с развернутым изображением
+        let quizStep = QuizStepViewModel(image: image, question: "Рейтинг этого фильма больше, чем 6?", questionNumber: "1/10")
+        // Вызов функции show(quiz:) с созданным объектом в качестве аргумента
+>>>>>>> sprint_04
         show(quiz: quizStep)
     }
     
@@ -134,7 +146,11 @@ final class MovieQuizViewController: UIViewController {
         
         /// запускаем задачу через 1 секунду c помощью диспетчера задач
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+<<<<<<< HEAD
             self.imageView.layer.borderWidth = 0
+=======
+            self.imageView.layer.borderWidth = 0 /// Убираем рамку
+>>>>>>> sprint_04
             self.showNextQuestionOrResults()
         }
         
@@ -168,7 +184,13 @@ final class MovieQuizViewController: UIViewController {
         let dateFormatter = DateFormatter()
         dateFormatter.dateStyle = .short
         dateFormatter.timeStyle = .short
+<<<<<<< HEAD
         let currentDate = Date() /// Используем текущую дату
+=======
+        
+        let currentDate = Date() /// Используем текущую дату
+        
+>>>>>>> sprint_04
         let alert = UIAlertController(title: "Результаты",
                                       message: "Правильных ответов: \(correctAnswers)/\(questions.count)\nКоличество сыгранных квизов: \(totalQuizePlayed)\nЛучший результат: \(bestScore)/10\nДата лучшего результата: \(bestScoreDate != nil ? dateFormatter.string(from: bestScoreDate!) : dateFormatter.string(from: currentDate))\nСредняя точность: \(String(format: "%.2f", averageAccuracy))%",
                                       preferredStyle: .alert)
@@ -215,6 +237,10 @@ final class MovieQuizViewController: UIViewController {
         }
     }
     
+<<<<<<< HEAD
+=======
+
+>>>>>>> sprint_04
     @IBAction private func noButtonClicked(_ sender: UIButton) {
         let currentQuestion = questions[currentQuestionIndex]
         let givenAnswer = false
