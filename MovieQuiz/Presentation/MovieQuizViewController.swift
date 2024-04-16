@@ -2,12 +2,12 @@ import UIKit
 
 final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
     // MARK: - QuestionFactoryDelegate
-
+    
     func didReceiveNextQuestion(question: QuizQuestion?) {
         guard let question = question else {
             return
         }
-
+        
         currentQuestion = question
         let viewModel = convert(model: question)
         
@@ -33,21 +33,27 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
     private let questionsAmount: Int = 10
     private var questionFactory: QuestionFactoryProtocol = QuestionFactory()
     private var currentQuestion: QuizQuestion?
+    private var statisticService: StatisticServiceImplementation = StatisticServiceImplementation()
+
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
-            /// Создание объекта QuizStepViewModel с развернутым изображением
+        /// Создание объекта QuizStepViewModel с развернутым изображением
         let questionFactory = QuestionFactory()
-               questionFactory.setup(delegate: self)
-               self.questionFactory = questionFactory
+        questionFactory.setup(delegate: self)
+        self.questionFactory = questionFactory
         questionFactory.requestNextQuestion()
         
-    }
-        
-        override var preferredStatusBarStyle: UIStatusBarStyle {
-            return .lightContent
+        enum FileManagerError: Error {
+            case fileDoesntExist
         }
-        
+    }
+    
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
+    }
+
         /// приватный метод конвертации, который принимает моковый вопрос и возвращает вью модель для главного экрана
         private func convert(model: QuizQuestion) -> QuizStepViewModel {
             let questionStep = QuizStepViewModel(
@@ -87,43 +93,50 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
         
         /// приватный метод для показа результатов раунда квиза
         /// принимает вью модель QuizResultsViewModel и ничего не возвращает
-        private func show(quiz result: QuizResultsViewModel) {
-            let alert = UIAlertController(
-                title: result.title,
-                message: result.text,
-                preferredStyle: .alert)
-            
-            let action = UIAlertAction(title: result.buttonText, style: .default) { [weak self] _ in
-                guard let self = self else { return } // разворачиваем слабую ссылку
-                
-                self.currentQuestionIndex = 0
-                self.correctAnswers = 0
-                questionFactory.requestNextQuestion()
-            }
-            
-            alert.addAction(action)
-            
-            self.present(alert, animated: true, completion: nil)
+    private func show(quiz result: QuizResultsViewModel) {
+        let alert = UIAlertController(
+            title: result.title,
+            message: result.text,
+            preferredStyle: .alert
+        )
+        
+        let action = UIAlertAction(title: result.buttonText, style: .default) { [weak self] _ in
+            guard let self = self else { return }
+            self.currentQuestionIndex = 0
+            self.correctAnswers = 0
+            self.questionFactory.requestNextQuestion()
         }
         
+        alert.addAction(action)
+        
+        self.present(alert, animated: true, completion: nil)
+    }
+        
         private func showResultsAlert(correctAnswers: Int) {
-            _ = Double(correctAnswers) / Double(questionsAmount) * 100.0
+            statisticService.store(correct: correctAnswers, total: questionsAmount)
+            
+            let averageAccuracy = statisticService.totalAccuracy
+            let gamesCount = statisticService.gamesCount
+            let bestGameMessage = statisticService.bestGameMessage()
+            let bestGame = statisticService.bestGame
+            let bestScore = bestGame.correct
             
             let dateFormatter = DateFormatter()
             dateFormatter.dateStyle = .short
             dateFormatter.timeStyle = .short
-            let currentDate = Date() /// Используем текущую дату
-            let alert = UIAlertController(title: "Результаты",
-                                          message: "Правильных ответов: \(correctAnswers)/\(questionsAmount)\nКоличество сыгранных квизов: \(totalQuizePlayed)\nЛучший результат: \(bestScore)/10\nДата лучшего результата: \(bestScoreDate != nil ? dateFormatter.string(from: bestScoreDate!) : dateFormatter.string(from: currentDate))\nСредняя точность: \(String(format: "%.2f", averageAccuracy))%",
-                                          preferredStyle: .alert)
             
-            let playAgainAction = UIAlertAction(title: "Сыграть ещё раз", style: .default) { _ in
+            _ = Date() /// Используем текущую дату
+            let alertModel = AlertModel(
+                title: "Этот раунд окончен!",
+                message: "Правильных ответов: \(correctAnswers)/\(questionsAmount)\nКоличество сыгранных квизов: \(gamesCount)\n\(bestGameMessage)\nСредняя точность: \(String(format: "%.2f", averageAccuracy))%",
+                buttonText: "Сыграть ещё раз"
+            ) {
                 self.startNewRound()
             }
-            
-            alert.addAction(playAgainAction)
-            
-            present(alert, animated: true, completion: nil)
+
+            AlertPresenter.presentAlert(from: self, with: alertModel)
+            statisticService.storeBestGameIfNecessary(correct: correctAnswers, total: questionsAmount)
+
         }
         
         
@@ -177,4 +190,3 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
         }
         
     }
-
