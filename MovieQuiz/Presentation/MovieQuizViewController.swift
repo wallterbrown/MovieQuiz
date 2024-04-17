@@ -1,20 +1,7 @@
 import UIKit
 
 final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
-    // MARK: - QuestionFactoryDelegate
-    
-    func didReceiveNextQuestion(question: QuizQuestion?) {
-        guard let question = question else {
-            return
-        }
-        
-        currentQuestion = question
-        let viewModel = convert(model: question)
-        
-        DispatchQueue.main.async { [weak self] in
-            self?.show(quiz: viewModel)
-        }
-    }
+ 
     // MARK: - Lifecycle
     
     @IBOutlet private var imageView: UIImageView!
@@ -29,6 +16,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
     private var averageAccuracy: Double = 0.0
     private var currentScore = 0
     private var totalCorrectAnswers = 0
+
     
     private let questionsAmount: Int = 10
     private var questionFactory: QuestionFactoryProtocol = QuestionFactory()
@@ -53,7 +41,20 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
     }
-
+    // MARK: - QuestionFactoryDelegate
+    
+    func didReceiveNextQuestion(question: QuizQuestion?) {
+        guard let question = question else {
+            return
+        }
+        
+        currentQuestion = question
+        let viewModel = convert(model: question)
+        
+        DispatchQueue.main.async { [weak self] in
+            self?.show(quiz: viewModel)
+        }
+    }
         /// приватный метод конвертации, который принимает моковый вопрос и возвращает вью модель для главного экрана
         private func convert(model: QuizQuestion) -> QuizStepViewModel {
             let questionStep = QuizStepViewModel(
@@ -76,6 +77,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
             if isCorrect { // 1
                 correctAnswers += 1 // 2
             }
+            //.isEnabled = false
             imageView.layer.masksToBounds = true // 1
             imageView.layer.borderWidth = 8 // 2
             imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor // 3
@@ -90,7 +92,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
             }
             
         }
-        
+    
         /// приватный метод для показа результатов раунда квиза
         /// принимает вью модель QuizResultsViewModel и ничего не возвращает
     private func show(quiz result: QuizResultsViewModel) {
@@ -178,6 +180,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
                 return
             }
             let givenAnswer = false
+            
             showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
         }
         
@@ -186,7 +189,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
                 return
             }
             let givenAnswer = true // 2
+            
             showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+            
         }
         
     }
