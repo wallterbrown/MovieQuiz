@@ -29,7 +29,7 @@ final class StatisticServiceImplementation: StatisticService {
         guard let correct = userDefaults.value(forKey: Keys.correct.rawValue) as? Int,
               let total = userDefaults.value(forKey: Keys.total.rawValue) as? Int,
               total > 0 else {
-            return 0.0
+            return 0
         }
         return Double(correct) / Double(total) * 100
     }
@@ -83,11 +83,25 @@ final class StatisticServiceImplementation: StatisticService {
     
     func storeBestGameIfNecessary(correct count: Int, total amount: Int) {
         let currentAccuracy = totalAccuracy
-        let newAccuracy = Double(count) / Double(amount)
-        
-        if newAccuracy > currentAccuracy {
+        let newAccuracy = Double(count) / Double(amount) * 100
+        print("New accuracy: \(newAccuracy), Current accuracy: \(currentAccuracy)")
+
+        if newAccuracy >= currentAccuracy {
             let bestGame = GameRecord(correct: count, total: amount, date: Date())
             self.bestGame = bestGame
+            print("Best game updated: \(bestGame)")
+            // Проверяем, успешно ли сохранен лучший результат
+                  let savedBestGame = self.bestGame
+                  if savedBestGame.correct == bestGame.correct && savedBestGame.total == bestGame.total && savedBestGame.date == bestGame.date {
+                      print("Best game successfully saved to UserDefaults")
+                  } else {
+                      print("Failed to save best game to UserDefaults")
+                  }
         }
+
+        // Обновляем total и correct независимо от текущей точности
+        userDefaults.set(count, forKey: Keys.correct.rawValue)
+        userDefaults.set(amount, forKey: Keys.total.rawValue)
     }
+
 }
