@@ -5,14 +5,16 @@ protocol StatisticService {
     var totalAccuracy: Double { get }
     var gamesCount: Int { get }
     var bestGame: GameRecord { get }
-
+    func bestGameMessage() -> String
+    func storeBestGameIfNecessary(correct: Int, total: Int)
+    
 }
 
 struct GameRecord: Codable {
     let correct: Int
     let total: Int
     let date: Date
-
+    
     func isBetterThan(_ another: GameRecord) -> Bool {
         correct > another.correct
     }
@@ -38,21 +40,12 @@ final class StatisticServiceImplementation: StatisticService {
         return userDefaults.integer(forKey: Keys.gamesCount.rawValue)
     }
     
-
+    var totalCorrect: Int {
+        return userDefaults.integer(forKey: Keys.correct.rawValue)
+    }
     
-    func store(correct count: Int, total amount: Int) {
-        let currentAccuracy = totalAccuracy
-        let newAccuracy = Double(count) / Double(amount)
-        
-        if newAccuracy > currentAccuracy {
-            userDefaults.set(count, forKey: Keys.correct.rawValue)
-            userDefaults.set(amount, forKey: Keys.total.rawValue)
-            userDefaults.set(Date(), forKey: Keys.bestGame.rawValue)
-            storeBestGameIfNecessary(correct: count, total: amount)
-        }
-        
-        let currentGamesCount = gamesCount
-        userDefaults.set(currentGamesCount + 1, forKey: Keys.gamesCount.rawValue)
+    var totalQuestions: Int {
+        return userDefaults.integer(forKey: Keys.total.rawValue)
     }
     
     var bestGame: GameRecord {
@@ -73,35 +66,38 @@ final class StatisticServiceImplementation: StatisticService {
         }
     }
     
+    func store(correct count: Int, total amount: Int) {
+        let currentGamesCount = gamesCount
+        userDefaults.set(currentGamesCount + 1, forKey: Keys.gamesCount.rawValue)
+        
+        let currentCorrect = totalCorrect
+        let currentTotal = totalQuestions
+        
+        let newCorrect = currentCorrect + count
+        let newTotal = currentTotal + amount
+        
+        userDefaults.set(newCorrect, forKey: Keys.correct.rawValue)
+        userDefaults.set(newTotal, forKey: Keys.total.rawValue)
+        
+        storeBestGameIfNecessary(correct: count, total: amount)
+    }
+    
     func bestGameMessage() -> String {
-           let bestGame = self.bestGame
-           let dateFormatter = DateFormatter()
-           dateFormatter.dateFormat = "dd.MM.yyyy HH:mm"
-           let date = dateFormatter.string(from: bestGame.date)
-           return "Рекорд: \(bestGame.correct)/\(bestGame.total) (\(date))"
-       }
+        let bestGame = self.bestGame
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd.MM.yyyy HH:mm"
+        let date = dateFormatter.string(from: bestGame.date)
+        return "Рекорд: \(bestGame.correct)/\(bestGame.total) (\(date))"
+    }
     
     func storeBestGameIfNecessary(correct count: Int, total amount: Int) {
-        let currentAccuracy = totalAccuracy
-        let newAccuracy = Double(count) / Double(amount) * 100
-        print("New accuracy: \(newAccuracy), Current accuracy: \(currentAccuracy)")
-
+        let bestGame = self.bestGame
+        let currentAccuracy = Double(bestGame.correct) / Double(bestGame.total)
+        let newAccuracy = Double(count) / Double(amount)
+        
         if newAccuracy >= currentAccuracy {
-            let bestGame = GameRecord(correct: count, total: amount, date: Date())
-            self.bestGame = bestGame
-            print("Best game updated: \(bestGame)")
-            // Проверяем, успешно ли сохранен лучший результат
-                  let savedBestGame = self.bestGame
-                  if savedBestGame.correct == bestGame.correct && savedBestGame.total == bestGame.total && savedBestGame.date == bestGame.date {
-                      print("Best game successfully saved to UserDefaults")
-                  } else {
-                      print("Failed to save best game to UserDefaults")
-                  }
+            let newRecord = GameRecord(correct: count, total: amount, date: Date())
+            self.bestGame = newRecord
         }
-
-        // Обновляем total и correct независимо от текущей точности
-        userDefaults.set(count, forKey: Keys.correct.rawValue)
-        userDefaults.set(amount, forKey: Keys.total.rawValue)
     }
-
 }
