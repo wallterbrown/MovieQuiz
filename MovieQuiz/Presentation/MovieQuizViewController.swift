@@ -150,8 +150,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
     }
     
     private func showNextQuestionOrResults() {
-        yesButton.isEnabled = false
-        noButton.isEnabled = false
+        
         
         if currentQuestionIndex == questionsAmount - 1 {
             let text = correctAnswers == questionsAmount ?
@@ -174,8 +173,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
         } else {
             currentQuestionIndex += 1
             self.questionFactory.requestNextQuestion()
-            yesButton.isEnabled = true
-            noButton.isEnabled = true
+          
             
         }
     }
