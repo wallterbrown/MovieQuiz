@@ -120,7 +120,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
         
         let averageAccuracy = statisticService.totalAccuracy
         let gamesCount = statisticService.gamesCount
-        let bestGameMessage = statisticService.bestGameMessage()
         let bestGame = statisticService.bestGame
         let bestScore = bestGame.correct
         
@@ -130,15 +129,15 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
         
         _ = Date() /// Используем текущую дату
         let alertModel = AlertModel(
+
             title: "Этот раунд окончен!",
-            message: "Правильных ответов: \(correctAnswers)/\(questionsAmount)\nКоличество сыгранных квизов: \(gamesCount)\n\(bestGameMessage)\nСредняя точность: \(String(format: "%.2f", averageAccuracy))%",
-            buttonText: "Сыграть ещё раз"
+            message: "Ваш результат: \(correctAnswers)/10\nКоличество сыгранных квизов: \(gamesCount)\n Рекорд: \(bestGame.correct)/10 (\(bestGame.date.dateTimeString))\n Средняя точность: \(String(format: "%.2f", averageAccuracy))%", buttonText: "Сыграть еще раз"
         ) {
             self.startNewRound()
         }
         
         AlertPresenter.presentAlert(from: self, with: alertModel)
-        statisticService.storeBestGameIfNecessary(correct: correctAnswers, total: questionsAmount)
+
         
     }
     
