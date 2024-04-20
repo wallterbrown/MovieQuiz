@@ -19,7 +19,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
     private var averageAccuracy: Double = 0.0
     private var currentScore = 0
     private var totalCorrectAnswers = 0
-    
+    var isAnsweringQuestion = false
     
     private let questionsAmount: Int = 10
     private var questionFactory: QuestionFactoryProtocol = QuestionFactory()
@@ -34,7 +34,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
         questionFactory.setup(delegate: self)
         self.questionFactory = questionFactory
         questionFactory.requestNextQuestion()
-        
+        yesButton.isEnabled = true
+        noButton.isEnabled = true
         enum FileManagerError: Error {
             case fileDoesntExist
         }
@@ -131,7 +132,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
         let alertModel = AlertModel(
 
             title: "Этот раунд окончен!",
-            message: "Ваш результат: \(correctAnswers)/10\nКоличество сыгранных квизов: \(gamesCount)\n Рекорд: \(bestGame.correct)/10 (\(bestGame.date.dateTimeString))\n Средняя точность: \(String(format: "%.2f", averageAccuracy))%", buttonText: "Сыграть еще раз"
+            message: "Ваш результат: \(correctAnswers)/10\nКоличество сыгранных квизов: \(gamesCount)\n Рекорд: \(bestGame.correct)/10 (\(bestGame.date.dateTimeString))\n Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%", buttonText: "Сыграть еще раз"
         ) {
             self.startNewRound()
         }
@@ -182,6 +183,16 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
             return
         }
         let givenAnswer = false
+        if !isAnsweringQuestion {
+                   isAnsweringQuestion = true
+                   yesButton.isEnabled = false
+                   noButton.isEnabled = false
+                   DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                       self.isAnsweringQuestion = false
+                       self.yesButton.isEnabled = true
+                       self.noButton.isEnabled = true
+                   }
+               }
         
         showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
         
@@ -192,7 +203,16 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
             return
         }
         let givenAnswer = true // 2
-        
+        if !isAnsweringQuestion {
+                   isAnsweringQuestion = true
+                   yesButton.isEnabled = false
+                   noButton.isEnabled = false
+                   DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                       self.isAnsweringQuestion = false
+                       self.yesButton.isEnabled = true
+                       self.noButton.isEnabled = true
+                   }
+               }
         showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
         
     }
