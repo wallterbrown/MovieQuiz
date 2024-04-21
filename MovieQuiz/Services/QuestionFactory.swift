@@ -7,23 +7,14 @@
 
 import Foundation
 
-
-class QuestionFactory: QuestionFactoryProtocol {
-    
-    private let moviesLoader: MoviesLoading
-    private var delegate: QuestionFactoryDelegate?
+class QuestionFactory: QuestionFactoryProtocol{
+    internal let moviesLoader: MoviesLoading
+    internal weak var delegate: QuestionFactoryDelegate?
     private var movies: [MostPopularMovie] = []
-   
         init(moviesLoader: MoviesLoading, delegate: QuestionFactoryDelegate?) {
             self.moviesLoader = moviesLoader
             self.delegate = delegate
         }
-
-        
-    /*
-    /// массив вопросов
-    private let questions: [QuizQuestion] = [
-
     func loadData() {
         moviesLoader.loadMovies { [weak self] result in
             DispatchQueue.main.async {
@@ -39,7 +30,6 @@ class QuestionFactory: QuestionFactoryProtocol {
         }
     }     /// массив вопросов
   /*  private let questions: [QuizQuestion] = [
-
         QuizQuestion(
             image: "The Godfather",
             text: "Рейтинг этого фильма больше чем 6?",
@@ -81,14 +71,8 @@ class QuestionFactory: QuestionFactoryProtocol {
             text: "Рейтинг этого фильма больше чем 6?",
             correctAnswer: false)
     ]
-
-    */
-  
-    
-
     
     */
-
     func requestNextQuestion() {
         DispatchQueue.global().async { [weak self] in
             guard let self = self else { return }
@@ -98,10 +82,7 @@ class QuestionFactory: QuestionFactoryProtocol {
             
             var imageData = Data()
            
-
-
            do {
-
                 imageData = try Data(contentsOf: movie.resizedImageURL)
             } catch {
                 print("Failed to load image")
@@ -122,9 +103,7 @@ class QuestionFactory: QuestionFactoryProtocol {
             }
         }
     }
-    
-   func setup(delegate: QuestionFactoryDelegate) {
+    func setup(delegate: QuestionFactoryDelegate) {
            self.delegate = delegate
        }
-    
 }
