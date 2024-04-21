@@ -9,7 +9,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
     @IBOutlet private var counterLabel: UILabel!
     @IBOutlet private weak var yesButton: UIButton!
     @IBOutlet private weak var noButton: UIButton!
-    
+
     
     private var currentQuestionIndex = 0
     private var correctAnswers = 0
@@ -30,12 +30,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
     override func viewDidLoad() {
         super.viewDidLoad()
         /// Создание объекта QuizStepViewModel с развернутым изображением
-        let questionFactory = QuestionFactory()
-        questionFactory.setup(delegate: self)
-        self.questionFactory = questionFactory
-        questionFactory.requestNextQuestion()
+        imageView.layer.cornerRadius = 20
+        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
         yesButton.isEnabled = true
         noButton.isEnabled = true
+        showLoadingIndicator()
+        questionFactory.loadData()
+        
         enum FileManagerError: Error {
             case fileDoesntExist
         }
@@ -44,6 +45,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
     }
+    
+    
+    private func showLoadingIndicator() {
+        activityIndicator.isHidden = false // говорим, что индикатор загрузки не скрыт
+        activityIndicator.startAnimating() // включаем анимацию
+    }
+    
     // MARK: - QuestionFactoryDelegate
     
     func didReceiveNextQuestion(question: QuizQuestion?) {
@@ -58,13 +66,29 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
             self?.show(quiz: viewModel)
         }
     }
+    
+    private func showNetworkError(message: String) {
+        activityIndicator.isHidden = true
+        
+        let alertModel = AlertModel(
+            
+            title: "Этот раунд окончен!",
+            message: message,
+            buttonText: "Сыграть еще раз"
+        ) {
+            self.startNewRound()
+        }
+        
+        AlertPresenter.presentAlert(from: self, with: alertModel)
+       
+    }
+    
     /// приватный метод конвертации, который принимает моковый вопрос и возвращает вью модель для главного экрана
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
-        let questionStep = QuizStepViewModel(
-            image: UIImage(named: model.image) ?? UIImage(),
+        return QuizStepViewModel(
+            image: UIImage(data: model.image) ?? UIImage(),
             question: model.text,
             questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
-        return questionStep
     }
     
     /// приватный метод вывода на экран вопроса, который принимает на вход вью модель вопроса и ничего не возвращает
@@ -130,7 +154,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
         
         _ = Date() /// Используем текущую дату
         let alertModel = AlertModel(
-
+            
             title: "Этот раунд окончен!",
             message: "Ваш результат: \(correctAnswers)/10\nКоличество сыгранных квизов: \(gamesCount)\n Рекорд: \(bestGame.correct)/10 (\(bestGame.date.dateTimeString))\n Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%", buttonText: "Сыграть еще раз"
         ) {
@@ -138,7 +162,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
         }
         
         AlertPresenter.presentAlert(from: self, with: alertModel)
-
+        
         
     }
     
@@ -150,7 +174,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
     }
     
     private func showNextQuestionOrResults() {
-        
         
         if currentQuestionIndex == questionsAmount - 1 {
             let text = correctAnswers == questionsAmount ?
@@ -173,9 +196,16 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
         } else {
             currentQuestionIndex += 1
             self.questionFactory.requestNextQuestion()
-          
-            
         }
+    }
+    
+    func didLoadDataFromServer() {
+        activityIndicator.isHidden = true // скрываем индикатор загрузки
+        questionFactory.requestNextQuestion()
+    }
+    
+    func didFailToLoadData(with error: Error) {
+        showNetworkError(message: error.localizedDescription) // возьмём в качестве сообщения описание ошибки
     }
     
     @IBAction private func noButtonClicked(_ sender: UIButton) {
@@ -184,15 +214,15 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
         }
         let givenAnswer = false
         if !isAnsweringQuestion {
-                   isAnsweringQuestion = true
-                   yesButton.isEnabled = false
-                   noButton.isEnabled = false
-                   DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                       self.isAnsweringQuestion = false
-                       self.yesButton.isEnabled = true
-                       self.noButton.isEnabled = true
-                   }
-               }
+            isAnsweringQuestion = true
+            yesButton.isEnabled = false
+            noButton.isEnabled = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                self.isAnsweringQuestion = false
+                self.yesButton.isEnabled = true
+                self.noButton.isEnabled = true
+            }
+        }
         
         showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
         
@@ -204,15 +234,15 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
         }
         let givenAnswer = true // 2
         if !isAnsweringQuestion {
-                   isAnsweringQuestion = true
-                   yesButton.isEnabled = false
-                   noButton.isEnabled = false
-                   DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                       self.isAnsweringQuestion = false
-                       self.yesButton.isEnabled = true
-                       self.noButton.isEnabled = true
-                   }
-               }
+            isAnsweringQuestion = true
+            yesButton.isEnabled = false
+            noButton.isEnabled = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                self.isAnsweringQuestion = false
+                self.yesButton.isEnabled = true
+                self.noButton.isEnabled = true
+            }
+        }
         showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
         
     }
