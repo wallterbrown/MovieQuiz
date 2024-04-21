@@ -8,6 +8,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
     @IBOutlet private var counterLabel: UILabel!
     @IBOutlet private weak var yesButton: UIButton!
     @IBOutlet private weak var noButton: UIButton!
+
     @IBOutlet private var activityIndicator: UIActivityIndicatorView!
     
     private var currentQuestionIndex = 0
@@ -23,7 +24,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
     private let questionsAmount: Int = 10
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
-    private var statisticService: StatisticService = StatisticServiceImplementation()
+    private var statisticService: StatisticService?
     
     
     override func viewDidLoad() {
@@ -36,13 +37,17 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
         questionFactory?.loadData()
         /*
         /// Создание объекта QuizStepViewModel с развернутым изображением
+
         let questionFactory = QuestionFactory()
         questionFactory.setup(delegate: self)
         self.questionFactory = questionFactory
         questionFactory.requestNextQuestion()
         */
+
+
         yesButton.isEnabled = true
         noButton.isEnabled = true
+        
         enum FileManagerError: Error {
             case fileDoesntExist
         }
@@ -51,6 +56,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
     }
+    
+    
+    private func showLoadingIndicator() {
+        activityIndicator.isHidden = false // говорим, что индикатор загрузки не скрыт
+        activityIndicator.startAnimating() // включаем анимацию
+    }
+    
     // MARK: - QuestionFactoryDelegate
     
     func didReceiveNextQuestion(question: QuizQuestion?) {
@@ -66,6 +78,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
         }
     }
     
+
     private func showLoadingIndicator() {
         activityIndicator.isHidden = false // говорим, что индикатор загрузки не скрыт
         activityIndicator.startAnimating() // включаем анимацию
@@ -78,6 +91,23 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
     func didFailToLoadData(with error: Error) {
         showNetworkError(message: error.localizedDescription) // возьмём в качестве сообщения описание ошибки
     }
+
+    private func showNetworkError(message: String) {
+        activityIndicator.isHidden = true
+        
+        let alertModel = AlertModel(
+            
+            title: "Этот раунд окончен!",
+            message: message,
+            buttonText: "Сыграть еще раз"
+        ) {
+            self.startNewRound()
+        }
+        
+        AlertPresenter.presentAlert(from: self, with: alertModel)
+       
+    }
+    
     /// приватный метод конвертации, который принимает моковый вопрос и возвращает вью модель для главного экрана
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
         return QuizStepViewModel(
@@ -149,7 +179,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
         
         _ = Date() /// Используем текущую дату
         let alertModel = AlertModel(
-
+            
             title: "Этот раунд окончен!",
             message: "Ваш результат: \(correctAnswers)/10\nКоличество сыгранных квизов: \(gamesCount)\n Рекорд: \(bestGame.correct)/10 (\(bestGame.date.dateTimeString))\n Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%", buttonText: "Сыграть еще раз"
         ) {
@@ -157,7 +187,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
         }
         
         AlertPresenter.presentAlert(from: self, with: alertModel)
-
+        
         
     }
     
@@ -169,7 +199,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
     }
     
     private func showNextQuestionOrResults() {
-        
         
         if currentQuestionIndex == questionsAmount - 1 {
             let text = correctAnswers == questionsAmount ?
@@ -191,6 +220,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
             }
         } else {
             currentQuestionIndex += 1
+
             self.questionFactory?.requestNextQuestion()
           
             
@@ -217,6 +247,19 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
         }
         
         AlertPresenter.presentAlert(from: self, with: model)
+
+            self.questionFactory.requestNextQuestion()
+        }
+    }
+    
+    func didLoadDataFromServer() {
+        activityIndicator.isHidden = true // скрываем индикатор загрузки
+        questionFactory.requestNextQuestion()
+    }
+    
+    func didFailToLoadData(with error: Error) {
+        showNetworkError(message: error.localizedDescription) // возьмём в качестве сообщения описание ошибки
+
     }
     
     @IBAction private func noButtonClicked(_ sender: UIButton) {
@@ -225,15 +268,15 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
         }
         let givenAnswer = false
         if !isAnsweringQuestion {
-                   isAnsweringQuestion = true
-                   yesButton.isEnabled = false
-                   noButton.isEnabled = false
-                   DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                       self.isAnsweringQuestion = false
-                       self.yesButton.isEnabled = true
-                       self.noButton.isEnabled = true
-                   }
-               }
+            isAnsweringQuestion = true
+            yesButton.isEnabled = false
+            noButton.isEnabled = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                self.isAnsweringQuestion = false
+                self.yesButton.isEnabled = true
+                self.noButton.isEnabled = true
+            }
+        }
         
         showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
         
@@ -245,15 +288,15 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate{
         }
         let givenAnswer = true // 2
         if !isAnsweringQuestion {
-                   isAnsweringQuestion = true
-                   yesButton.isEnabled = false
-                   noButton.isEnabled = false
-                   DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                       self.isAnsweringQuestion = false
-                       self.yesButton.isEnabled = true
-                       self.noButton.isEnabled = true
-                   }
-               }
+            isAnsweringQuestion = true
+            yesButton.isEnabled = false
+            noButton.isEnabled = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                self.isAnsweringQuestion = false
+                self.yesButton.isEnabled = true
+                self.noButton.isEnabled = true
+            }
+        }
         showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
         
     }
