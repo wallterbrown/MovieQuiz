@@ -6,12 +6,14 @@
 //
 
 import Foundation
+
 struct Actor: Codable {
     let id: String
     let image: String
     let name: String
     let asCharacter: String
 }
+
 struct Movie: Codable {
     // создаём кастомный enum для обработки ошибок
     enum ParseError: Error {
