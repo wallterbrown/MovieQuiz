@@ -48,6 +48,7 @@
                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="aqB-ag-f7a" userLabel="Preview Image">
                                         <rect key="frame" x="0.0" y="43.5" width="374" height="561"/>
                                         <color key="backgroundColor" name="YP White"/>
+                                        <accessibility key="accessibilityConfiguration" identifier="Poster"/>
                                         <constraints>
                                             <constraint firstAttribute="width" secondItem="aqB-ag-f7a" secondAttribute="height" multiplier="2:3" id="PU8-Gj-Gmr"/>
                                         </constraints>
@@ -80,12 +81,13 @@
                                                     </userDefinedRuntimeAttribute>
                                                 </userDefinedRuntimeAttributes>
                                                 <connections>
-                                                    <action selector="noButtonClicked:" destination="BYZ-38-t0r" eventType="touchUpInside" id="75X-tT-Kni"/>
+                                                    <action selector="noButtonClicked:" destination="BYZ-38-t0r" eventType="touchUpInside" id="01m-BJ-ggR"/>
                                                 </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="pag-nd-Bs3" userLabel="YesButton">
                                                 <rect key="frame" x="197" y="0.0" width="177" height="60"/>
                                                 <color key="backgroundColor" name="YP White"/>
+                                                <accessibility key="accessibilityConfiguration" identifier="Yes"/>
                                                 <fontDescription key="fontDescription" name="YSDisplay-Medium" family="YS Display" pointSize="20"/>
                                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                                 <state key="normal" title="Да">
@@ -97,7 +99,7 @@
                                                     </userDefinedRuntimeAttribute>
                                                 </userDefinedRuntimeAttributes>
                                                 <connections>
-                                                    <action selector="yesButtonClicked:" destination="BYZ-38-t0r" eventType="touchUpInside" id="23Y-Mh-0pa"/>
+                                                    <action selector="yesButtonClicked:" destination="BYZ-38-t0r" eventType="touchUpInside" id="0es-32-BBZ"/>
                                                 </connections>
                                             </button>
                                         </subviews>
@@ -126,9 +128,9 @@
                         <outlet property="activityIndicator" destination="Fd6-vR-HlZ" id="daP-Mw-huI"/>
                         <outlet property="counterLabel" destination="K7h-Aj-Njv" id="ZP4-aT-X9y"/>
                         <outlet property="imageView" destination="aqB-ag-f7a" id="Y6U-tS-XeX"/>
-                        <outlet property="noButton" destination="2b3-fC-R4u" id="i9d-Jp-PCU"/>
+                        <outlet property="noButton" destination="2b3-fC-R4u" id="jL4-h8-rOw"/>
                         <outlet property="textLabel" destination="ghE-dZ-Xls" id="O39-E0-RpD"/>
-                        <outlet property="yesButton" destination="pag-nd-Bs3" id="55U-e7-fuq"/>
+                        <outlet property="yesButton" destination="pag-nd-Bs3" id="WsA-eY-sB0"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

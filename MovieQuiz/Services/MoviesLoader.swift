@@ -3,7 +3,7 @@
 //  MovieQuiz
 //
 //  Created by Всеволод Нагаев on 21.04.2024.
-//
+// ключ для Api   =   k_zcuw1ytf
 
 import Foundation
 protocol MoviesLoading {
@@ -11,12 +11,15 @@ protocol MoviesLoading {
 }
 
 struct MoviesLoader: MoviesLoading {
-    // MARK: - NetworkClient
-    private let networkClient = NetworkClient()
+  // MARK: - NetworkClient
+  private let networkClient: NetworkRouting
+  
+  init(networkClient: NetworkRouting = NetworkClient()) {
+      self.networkClient = networkClient
+  }
     
     // MARK: - URL
     private var mostPopularMoviesUrl: URL {
-        // Если мы не смогли преобразовать строку в URL, то приложение упадёт с ошибкой
         guard let url = URL(string: "https://tv-api.com/en/API/Top250Movies/k_zcuw1ytf") else {
             preconditionFailure("Unable to construct mostPopularMoviesUrl")
         }
@@ -37,4 +40,5 @@ struct MoviesLoader: MoviesLoading {
                 handler(.failure(error))
             }
         }
-    }}
+    }
+}
