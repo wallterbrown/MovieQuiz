@@ -12,7 +12,6 @@ protocol NetworkRouting {
 }
 
 struct NetworkClient: NetworkRouting {
-    
     private enum NetworkError: Error {
         case codeError
     }
@@ -26,19 +25,16 @@ struct NetworkClient: NetworkRouting {
                 handler(.failure(error))
                 return
             }
-            
             // Проверяем, что пришёл успешный код ответа
             if let response = response as? HTTPURLResponse,
-                response.statusCode < 200 && response.statusCode >= 300 {
+               response.statusCode < 200 && response.statusCode >= 300 {
                 handler(.failure(NetworkError.codeError))
                 return
             }
-            
             // Возвращаем данные
             guard let data = data else { return }
             handler(.success(data))
         }
-        
         task.resume()
     }
 }
