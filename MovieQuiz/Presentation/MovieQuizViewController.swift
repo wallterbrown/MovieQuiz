@@ -15,9 +15,7 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         presenter = MovieQuizPresenter(viewController: self)
-        
         imageView.layer.cornerRadius = 20
     }
     
@@ -25,26 +23,18 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
         return .lightContent
     }
     
-    
     func showLoadingIndicator() {
         activityIndicator.isHidden = false // говорим, что индикатор загрузки не скрыт
         activityIndicator.startAnimating() // включаем анимацию
     }
-    
-    
-    /// приватный метод вывода на экран вопроса, который принимает на вход вью модель вопроса и ничего не возвращает
+
     func show(quiz step: QuizStepViewModel) {
         imageView.layer.borderColor = UIColor.clear.cgColor
         imageView.image = step.image
         textLabel.text = step.question
         counterLabel.text = step.questionNumber
     }
-    
-    /// приватный метод, который меняет цвет рамки
-    /// принимает на вход булевое значение и ничего не возвращает
-    
-    /// приватный метод для показа результатов раунда квиза
-    /// принимает вью модель QuizResultsViewModel и ничего не возвращает
+ 
     func show(quiz result: QuizResultsViewModel) {
         let message = presenter.makeResultsMessage()
         
@@ -55,15 +45,11 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
         
         let action = UIAlertAction(title: result.buttonText, style: .default) { [weak self] _ in
             guard let self = self else { return }
-            
             self.presenter.restartGame()
         }
-        
         alert.addAction(action)
-        
         self.present(alert, animated: true, completion: nil)
     }
-    
     
     func highlightImageBorder(isCorrectAnswer: Bool) {
         imageView.layer.masksToBounds = true
@@ -85,13 +71,9 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
         let action = UIAlertAction(title: "Попробовать еще раз",
                                    style: .default) { [weak self] _ in
             guard let self = self else { return }
-            
             presenter.restartGame()
-            
         }
-        
         alert.addAction(action)
-        
         self.present(alert, animated: true, completion: nil)
     }
     
@@ -101,7 +83,6 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
     
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
         presenter.yesButtonClicked()
-        
     }
     
 }

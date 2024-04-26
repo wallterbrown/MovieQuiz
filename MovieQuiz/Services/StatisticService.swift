@@ -16,10 +16,10 @@ final class StatisticServiceImplementation: StatisticService {
     var totalCorrectAnswers: Int {
         get {
             guard let data = userDefaults.data(forKey: Keys.correct.rawValue),
-            let totalCorrectAnswers = try? JSONDecoder().decode(Int.self, from: data) else {
+                  let totalCorrectAnswers = try? JSONDecoder().decode(Int.self, from: data) else {
                 return 0
             }
-
+            
             return totalCorrectAnswers
         }
         
@@ -28,7 +28,7 @@ final class StatisticServiceImplementation: StatisticService {
                 print("Невозможно сохранить результат")
                 return
             }
-
+            
             userDefaults.set(data, forKey: Keys.correct.rawValue)
         }
     }
@@ -36,10 +36,10 @@ final class StatisticServiceImplementation: StatisticService {
         
         get {
             guard let data = userDefaults.data(forKey: Keys.total.rawValue),
-            let totalAmount = try? JSONDecoder().decode(Int.self, from: data) else {
+                  let totalAmount = try? JSONDecoder().decode(Int.self, from: data) else {
                 return 0
             }
-
+            
             return totalAmount
         }
         
@@ -48,7 +48,6 @@ final class StatisticServiceImplementation: StatisticService {
                 print("Невозможно сохранить результат")
                 return
             }
-
             userDefaults.set(data, forKey: Keys.total.rawValue)
         }
     }
@@ -58,7 +57,6 @@ final class StatisticServiceImplementation: StatisticService {
                   let totalAccuracy = try? JSONDecoder().decode(Double.self, from: data) else {
                 return 0.0
             }
-            
             return totalAccuracy
         }
         
@@ -67,7 +65,6 @@ final class StatisticServiceImplementation: StatisticService {
                 print("Невозможно сохранить результат")
                 return
             }
-
             userDefaults.set(data, forKey: Keys.totalAccuracy.rawValue)
         }
     }
@@ -75,10 +72,10 @@ final class StatisticServiceImplementation: StatisticService {
     var gamesCount: Int {
         get {
             guard let data = userDefaults.data(forKey: Keys.gamesCount.rawValue),
-            let gamesCount = try? JSONDecoder().decode(Int.self, from: data) else {
+                  let gamesCount = try? JSONDecoder().decode(Int.self, from: data) else {
                 return 0
             }
-
+            
             return gamesCount
         }
         
@@ -88,44 +85,43 @@ final class StatisticServiceImplementation: StatisticService {
                 return
             }
             userDefaults.set(data, forKey: Keys.gamesCount.rawValue)
-                   }
-               }
-               
-               var bestGame: GameRecord {
-                   get {
-                       guard let data = userDefaults.data(forKey: Keys.bestGame.rawValue) else {
-                                       return GameRecord.init(correct: 0, total: 0, date: Date())
-                                   }
-                                   do {
-                                       let record = try JSONDecoder().decode(GameRecord.self, from: data)
-                                       return record
-                                   } catch {
-                                       print("\(String(String(describing: error)))")
-                                       return GameRecord.init(correct: 0, total: 0, date: Date())
-                                   }
-                        }
-                   set {
-                       guard let data = try? JSONEncoder().encode(newValue) else {
-                           print("Невозможно сохранить результат")
-                           return
-                       }
-
-                       userDefaults.set(data, forKey: Keys.bestGame.rawValue)
-                   }
-               }
-    private enum Keys: String {
-            case correct, total, bestGame, gamesCount, totalAccuracy
         }
-        
-        func store(correct count: Int, total amount: Int) {
-                totalCorrectAnswers += count
-                totalAmount += amount
-                totalAccuracy = min(max((Double(totalCorrectAnswers)/Double(totalAmount)) * 100, 1), 100)
-                gamesCount += 1
-                if count > bestGame.correct {
-                    let newBestGame = GameRecord(correct: count, total: amount, date: Date())
-                    bestGame = newBestGame
-                }
-            }
-        
     }
+    
+    var bestGame: GameRecord {
+        get {
+            guard let data = userDefaults.data(forKey: Keys.bestGame.rawValue) else {
+                return GameRecord.init(correct: 0, total: 0, date: Date())
+            }
+            do {
+                let record = try JSONDecoder().decode(GameRecord.self, from: data)
+                return record
+            } catch {
+                print("\(String(String(describing: error)))")
+                return GameRecord.init(correct: 0, total: 0, date: Date())
+            }
+        }
+        set {
+            guard let data = try? JSONEncoder().encode(newValue) else {
+                print("Невозможно сохранить результат")
+                return
+            }
+            userDefaults.set(data, forKey: Keys.bestGame.rawValue)
+        }
+    }
+    private enum Keys: String {
+        case correct, total, bestGame, gamesCount, totalAccuracy
+    }
+    
+    func store(correct count: Int, total amount: Int) {
+        totalCorrectAnswers += count
+        totalAmount += amount
+        totalAccuracy = min(max((Double(totalCorrectAnswers)/Double(totalAmount)) * 100, 1), 100)
+        gamesCount += 1
+        if count > bestGame.correct {
+            let newBestGame = GameRecord(correct: count, total: amount, date: Date())
+            bestGame = newBestGame
+        }
+    }
+    
+}

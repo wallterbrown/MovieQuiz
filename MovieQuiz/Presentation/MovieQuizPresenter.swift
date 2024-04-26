@@ -12,14 +12,12 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         guard let question = question else {
             return
         }
-        
         currentQuestion = question
         let viewModel = convert(model: question)
         DispatchQueue.main.async { [weak self] in
             self?.viewController?.show(quiz: viewModel)
         }
     }
-    
     
     private let statisticService: StatisticService!
     private var questionFactory: QuestionFactoryProtocol?
@@ -32,9 +30,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     
     init(viewController: MovieQuizViewControllerProtocol) {
         self.viewController = viewController as? MovieQuizViewController
-        
         statisticService = StatisticServiceImplementation()
-        
         questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
         questionFactory?.loadData()
         viewController.showLoadingIndicator()
